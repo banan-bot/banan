@@ -15,16 +15,8 @@ module.exports = {
 				.setLabel('Cancel')
 				.setStyle(ButtonStyle.Secondary);
 
-			// the usePrompt button is disabled rn cuz it isn't implemented yet
-
-			const usePrompt = new ButtonBuilder()
-				.setCustomId('usePrompt')
-				.setLabel('Use the generated prompt')
-				.setStyle(ButtonStyle.Primary)
-				.setDisabled(true);
-
 			const row = new ActionRowBuilder()
-				.addComponents(cancel, usePrompt);
+				.addComponents(cancel);
 
 			const prompt = interaction.options.getString('description');
 			const apiKeyGemini = process.env.API_KEY_GEMINI;
@@ -97,7 +89,8 @@ module.exports = {
 						model: 'gemini-2.5-flash',
 						contents: [ { type: 'text', text: prompt } ],
 						config: {
-							// dis thing is setup by me atleast so, that's cool
+							// dis thing is also setup by me atleast so, that's cool
+							// even though we aren't using nano banana for image generation anymore, the system instruction can still work
 							systemInstruction: "You are an expert prompt generator for the AI image generation model Gemini 2.5 Flash Image aka Nano Banana. Your task is to create detailed and imaginative prompts based on user descriptions to help generate the perfect image. Focus on incorporating vivid details, artistic styles, color schemes, and specific elements that enhance the visual appeal of the prompt. Only generate one single prompt based on the user's description. Do not include any explanations or additional text, just the prompt itself.",
 						}
 					});
@@ -121,10 +114,9 @@ module.exports = {
 							if (confirmation.customId === 'cancel') {
 								confirmation.message.delete()
 								return;
-							} 
-							if (confirmation.customId === 'usePrompt') {
+							} else{
+								// if you get this message, something went very wrong
 								await confirmation.update({ content: `you shouldn't be able to get this message rn. what happened?`, components: [] });
-								return;
 							}
 						} catch (updErr) {
 							return;
@@ -139,10 +131,10 @@ module.exports = {
 			} catch (err) {
 				console.error('Generation error:', err);
 				const errMsg = truncateToDiscord(`Generation error: ${err?.message || String(err)}`);
-				try { await interaction.editReply({ content: errMsg }); }
+				try { await interaction.editReply({ content: "something failed :(" }); }
 					catch (editErr) {
 						console.error('Failed to edit reply, attempting followUp:', editErr);
-						try { await interaction.followUp({ content: errMsg, flags: MessageFlags.Ephemeral }); }
+						try { await interaction.followUp({ content: "something has failed :(", flags: MessageFlags.Ephemeral }); }
 						catch (followErr) { console.error('Failed to followUp as well:', followErr); }
 					}
 			}

@@ -34,32 +34,6 @@ module.exports = {
 			return s;
 		};
 
-		const extractTextFromCandidate = (candidate) => {
-			if (!candidate) return '';
-			const content = candidate.content;
-			if (typeof content === 'string') return content;
-			if (Array.isArray(content)) return content.map(part => (part && (part.text ?? part)).toString()).join('');
-			if (content && typeof content === 'object') {
-				if (Array.isArray(content.parts)) return content.parts.map(p => p.text || '').join('');
-				if (typeof content.text === 'string') return content.text;
-				if (typeof content.message === 'string') return content.message;
-				const collected = [];
-				const gather = (obj) => {
-					if (!obj) return;
-					if (typeof obj === 'string') return collected.push(obj);
-					if (Array.isArray(obj)) return obj.forEach(gather);
-					if (typeof obj === 'object') {
-						if (obj.text) collected.push(obj.text);
-						else Object.values(obj).forEach(gather);
-					}
-				};
-				gather(content);
-				if (collected.length) return collected.join('');
-				try { return JSON.stringify(content); } catch { return String(content); }
-			}
-			try { return JSON.stringify(candidate); } catch { return String(candidate); }
-		};
-
 		try {
 			const { GoogleGenAI } = await import('@google/genai');
 			const ai = new GoogleGenAI({ apiKey: apiKeyGemini });
@@ -116,7 +90,7 @@ module.exports = {
 			try { await interaction.editReply({ content: "something failed :(" }); }
 				catch (editErr) {
 					console.error('Failed to edit reply, attempting followUp:', editErr);
-					try { await interaction.followUp({ content: errMsg, flags: MessageFlags.Ephemeral }); }
+					try { await interaction.followUp({ content: "something has failed :(", flags: MessageFlags.Ephemeral }); }
 					catch (followErr) { console.error('Failed to followUp as well:', followErr); }
 				}
 		}
